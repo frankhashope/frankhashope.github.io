@@ -8,7 +8,7 @@ categories:
   - Virtualization
 ---
 
-本文主要以针对arm架构实现的virt机型为例，分析qemu是如何实现INTx中断的模拟和虚拟化的。qemu在x86架构下的实现可参考这篇[文章]([QEMU学习笔记——中断 - 博客 - binsite (binss.me)](https://www.binss.me/blog/qemu-note-of-interrupt/))。
+本文主要以针对arm架构实现的virt机型为例，分析qemu是如何实现INTx中断的模拟和虚拟化的。qemu在x86架构下的实现可参考这篇[文章](https://www.binss.me/blog/qemu-note-of-interrupt/)。
 
 ### irqmap
 
@@ -33,25 +33,25 @@ static const int a15irqmap[] = {
 
 通用输入输出引脚，顾名思义可以用作输入也可以用于输出电信号，通常在中断控制器上有。qemu中使用结构体NamedGPIOList来表示一个设备上的GPIO控制器。一个设备上可以有多个GPIO控制器，于是可以通过node将多个NamedGPIOList作为链表链接。
 
-```C
+```c
 struct NamedGPIOList {
     char *name;
-    qemu_irq *in;   // 输入中断数组
-    int num_in;		// 输入引脚的个数
-    int num_out;	// 输出引脚的个数
+    qemu_irq *in;// 输入中断数组
+    int num_in;// 输入引脚的个数
+    int num_out;// 输出引脚的个数
     QLIST_ENTRY(NamedGPIOList) node;
 }
 ```
 
 qemu_irq是IRQState结构体的别名，用来模拟中断引脚。
 
-```C
+```c
 struct IRQState {
     Object parent_obj;
 
-    qemu_irq_handler handler;	// 中断的处理回调
-    void *opaque;				// 指向所属设备
-    int n;						// 引脚号
+    qemu_irq_handler handler;// 中断的处理回调
+    void *opaque;// 指向所属设备
+    int n;// 引脚号
 }
 ```
 
@@ -121,7 +121,7 @@ for (i = 0; i < GPEX_NUM_IRQS; i++) {
 
 同时create_pcie_irq_map函数还会在设备树（FDT）中添加PCI插槽和GIC输入中断引脚的连接关系，即中断路由表。PCI/PCIe规范中推荐了PCI设备的传统中断引脚与中断控制器的映射关系表，可以看到32个插槽被分为了四组。因此，在create_pcie_irq_map中只需要在interrupt-map中设置0-3号slot，其余的slot通过与interrupt-map-mask进行与后再从interrupt-map中查找。
 
-![image-center]({{ site.url }}{{ site.baseurl }}/assets/images/sys_in_remap.png){: .align-center}
+![image-center]({{ site.url }}{{ site.baseurl }}/assets/images/sys_int_remap.png){: .align-center}
 
 ```c
 static void create_pcie_irq_map(const MachineState *ms,
@@ -223,7 +223,7 @@ static void acpi_dsdt_add_pci_route_table(Aml *dev, uint32_t irq)
 
 ### 其他PCI桥设备
 
-PCI桥规范没有要求桥设备传递其下PCI设备的中断请求，实际上多数PCI桥也没有为下游PCI总线提供中断引脚INTx#，但是PCI桥也推荐使用表1-1来建立下游PCI设备的INTx信号与上游PCI总线INTx信号之间的映射关系。以标准的PCI-to-PCI桥为例，设置这种中断映射关系的函数为pci_swizzle_map_irq_fn。PCI桥下设备如果使用传统的INTx，则需要将中断根据中断路由表来层层往上传递中断信号。
+PCI桥规范没有要求桥设备传递其下PCI设备的中断请求，实际上多数PCI桥也没有为下游PCI总线提供中断引脚INTx#，但是PCI桥也推荐使用上面的映射关系表来建立下游PCI设备的INTx信号与上游PCI总线INTx信号之间的映射关系。以标准的PCI-to-PCI桥为例，设置这种中断映射关系的函数为pci_swizzle_map_irq_fn。PCI桥下设备如果使用传统的INTx，则需要将中断根据中断路由表来层层往上传递中断信号。
 
 ```c
 static void pci_change_irq_level(PCIDevice *pci_dev, int irq_num, int change)
@@ -243,6 +243,7 @@ static void pci_change_irq_level(PCIDevice *pci_dev, int irq_num, int change)
 ### 参考资料
 
 [1] [PCI Express体系结构导读](https://github.com/vvvlan/misc/blob/master/PCI+Express%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E5%AF%BC%E8%AF%BB.pdf)
+
 [2] [Advanced Configuration and Power Interface (ACPI) Specification](https://uefi.org/specs/ACPI/6.4/index.html)
 
 
