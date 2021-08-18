@@ -337,3 +337,11 @@ void qemu_system_reset_request(ShutdownCause reason)
     qemu_notify_event();
 }
 ```
+
+### 参考资料
+
+[1] [计算机是如何实现重启的](https://shaocheng.li/posts/2017/11/30/)
+
+[2] [Advanced Configuration and Power Interface (ACPI) Specification](https://uefi.org/specs/ACPI/6.4/)
+
+[3] [Intel I/O Controller Hub 9 (ICH9) Family Datasheet](https://www.intel.com/content/dam/doc/datasheet/io-controller-hub-9-datasheet.pdf)

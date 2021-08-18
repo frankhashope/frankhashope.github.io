@@ -9,32 +9,37 @@
 
 <url>
   <loc>https://frankhashope.github.io/</loc>
-  <lastmod>2021-07-12T03:47:26+00:00</lastmod>
+  <lastmod>2021-08-18T06:52:48+00:00</lastmod>
   <priority>1.00</priority>
 </url>
 <url>
   <loc>https://frankhashope.github.io/year-archive/</loc>
-  <lastmod>2021-07-12T03:47:26+00:00</lastmod>
+  <lastmod>2021-08-18T06:52:48+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://frankhashope.github.io/categories/</loc>
-  <lastmod>2021-07-12T03:47:26+00:00</lastmod>
+  <lastmod>2021-08-18T06:52:48+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://frankhashope.github.io/virtualization/vm_reboot_shutdown_reset/</loc>
+  <lastmod>2021-08-18T06:52:48+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://frankhashope.github.io/virtualization/virtio_vga_and_virtio_gpu/</loc>
-  <lastmod>2021-07-12T03:47:26+00:00</lastmod>
+  <lastmod>2021-08-18T06:52:48+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://frankhashope.github.io/virtualization/INTx_in_qemu_virt/</loc>
-  <lastmod>2021-07-12T03:47:26+00:00</lastmod>
+  <lastmod>2021-08-18T06:52:48+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://frankhashope.github.io/virtualization/virtio_blk_qemu_threads/</loc>
-  <lastmod>2021-07-12T03:47:26+00:00</lastmod>
+  <lastmod>2021-08-18T06:52:48+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 
