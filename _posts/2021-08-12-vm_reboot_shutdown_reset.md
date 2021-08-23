@@ -8,7 +8,7 @@ categories:
   - Virtualization
 ---
 
-和物理计算机一样，虚拟机同样需要类似重启、关机、重置等的生命周期操作，本文基于qemu/KVM分析上述生命周期在系统虚拟化的实现。
+目前物理计算机的电源管理大部分均采用ACPI技术，它是英特尔等公司提出的操作系统应用程序管理所有电源管理接口的规范，包括了软件和硬件方面的规范，操作系统的电源管理功能通过调用 ACPI 接口，实现对符合 ACPI 规范的硬件设备的电源管理。和物理计算机一样，虚拟机同样需要类似重启、关机、重置等的生命周期操作，本文基于qemu/KVM分析上述生命周期在系统虚拟化的实现。
 
 ### 关机
 
@@ -220,13 +220,11 @@ static void acpi_ged_send_event(AcpiDeviceIf *adev, AcpiEventStatusBits ev)
 
 ### 重启
 
-计算机的重启可以有多种方式，比如基于ACPI reset寄存器、键盘控制器、x86平台南桥的0xCF9端口、直接调用固件接口等。同样，qemu也为虚拟机实现了上述多种方式的重启实现。
-
-目前物理计算机的电源管理大部分均采用ACPI技术，它是英特尔等公司提出的操作系统应用程序管理所有电源管理接口的规范，包括了软件和硬件方面的规范，操作系统的电源管理功能通过调用 ACPI 接口，实现对符合 ACPI 规范的硬件设备的电源管理。其中，ACPI规定了一个reset register，通过向这个寄存器写入特定值来重置计算机。
+计算机的重启可以有多种方式，比如基于ACPI reset寄存器、键盘控制器、x86平台南桥的0xCF9端口、直接调用固件接口等。同样，qemu也为虚拟机实现了上述多种方式的重启实现。qemu中只有x86下的q35机型实现了通过ACPI reset寄存器实现虚拟机的重启。
 
 ![image-center]({{ site.url }}{{ site.baseurl }}/assets/images/acpi_reset_register.png){: .align-center}
 
-qemu中只有x86下的q35机型实现了通过该寄存器重置虚拟机的方式：将该寄存器与南桥的RST_CNT寄存器（0xCF9端口）绑定，并通过build_fadt()函数构建到FADT表。
+q35机型将ACPI reset寄存器与南桥的RST_CNT寄存器（0xCF9端口）绑定，并通过build_fadt()函数构建到FADT表。
 
 ```c
 if (lpc) {
@@ -296,7 +294,7 @@ void qemu_devices_reset(void)
 }
 ```
 
-arm下的virt机型和关机一样，通过PSCI实现重启，可见其最终也是调用了qemu_system_reset_request()来发送重置请求。
+arm下的virt机型和关机一样，通过PSCI实现重启，最终也是调用了qemu_system_reset_request()来发送重置请求。
 
 ```c
 case KVM_EXIT_SYSTEM_EVENT:
@@ -314,7 +312,7 @@ case KVM_EXIT_SYSTEM_EVENT:
 
 ### 重置
 
-virsh reset可以重置虚拟机，其通过qmp接口调用qmp_system_reset()接口通知到主线程。其与virsh reboot的差别就是虚拟机不需要先shutdown，模拟物理上的重置键，因此可能会有数据丢失。
+virsh reset可以重置虚拟机，其通过qmp接口调用qmp_system_reset()接口通知到主线程。其与virsh reboot的差别就是其模拟物理上的重置键，虚拟机重启过程中不需要先shutdown，因此可能会有数据丢失。
 
 ```c
 void qmp_system_reset(Error **errp)
