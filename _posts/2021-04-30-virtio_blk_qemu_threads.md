@@ -8,7 +8,7 @@ categories:
   - Virtualization
 ---
 
-最近在测试openEuler发布的用rust写的虚拟化平台StratoVirt，当使用virtio-blk设备并且配置1个iothread时，I/O性能竟然比qemu在镜像介质为SSD或者内存盘的情况下性能还要好10%左右，这多少有点让人感到惊讶。
+最近在测试openEuler发布的用rust写的虚拟化平台StratoVirt，当使用virtio-blk-device设备并且配置1个iothread时，I/O性能竟然比qemu在镜像介质为SSD或者内存盘的情况下性能还要好10%左右，这多少有点让人感到惊讶。
 qemu作为一个目前主流的虚拟化模拟器经过全球众多开发人员的优化，性能应该是做的很好了，为什么使用rust写的StratoVirt在这个场景下性能比qemu还要好呢。于是决定深入分析一下qemu的virtio-blk I/O相关代码。
 
 ### virtio-blk
@@ -295,7 +295,7 @@ void virtio_notify_irqfd(VirtIODevice *vdev, VirtQueue *vq)
     event_notifier_set(&vq->guest_notifier);
 }
 ```
-在设备不使用MSI/MSI-X时，向guest注入中断的回调为virtio_queue_guest_notifier_read函数，其通过ioctl系统调用借助KVM模块实现中断注入的目的。virtio_queue_guest_notifier_read由event_notifier_set_handler函数注册：
+在设备不使用MSI/MSI-X或者KVM不支持KVM_CAP_IRQ时，向guest注入中断的回调为virtio_queue_guest_notifier_read函数，其通过ioctl系统调用借助KVM模块实现中断注入的目的。virtio_queue_guest_notifier_read由event_notifier_set_handler函数注册，注入中断的事件被加到了main loop的iohandler_ctx这个事件源里，也就是说IO完成后会通过写eventfd通知主线程，再由主线程来注入中断。
 ```c
 void event_notifier_set_handler(EventNotifier *e,
                                 EventNotifierHandler *handler)
@@ -305,7 +305,15 @@ void event_notifier_set_handler(EventNotifier *e,
                            handler, NULL);
 }
 ```
-可以看到注入中断的事件被加到了main loop的iohandler_ctx这个事件源里，也就是说IO完成后会通过写eventfd通知主线程，再由主线程来注入中断。
+如果是支持MSI/MSI-X中断PCI设备，可以通过irqfd直接将中断通过KVM注入给虚拟机的vcpu。相较于使用KVM_SIGNAL_MSI的中断注入方式，irqfd性能更好。
+
+```c
+virtio_pci_set_guest_notifiers
+    --> kvm_virtio_pci_vector_use
+    	-- > kvm_virtio_pci_irqfd_use
+    		-- > kvm_irqchip_add_irqfd_notifier_gsi
+    			-- > kvm_irqchip_assign_irqfd
+```
 
 ### 总结
 
