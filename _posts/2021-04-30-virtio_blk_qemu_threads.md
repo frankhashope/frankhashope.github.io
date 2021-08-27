@@ -305,7 +305,7 @@ void event_notifier_set_handler(EventNotifier *e,
                            handler, NULL);
 }
 ```
-如果是支持MSI/MSI-X中断PCI设备，可以通过irqfd直接将中断通过KVM注入给虚拟机的vcpu。相较于使用KVM_SIGNAL_MSI的中断注入方式，irqfd性能更好。
+如果是支持MSI/MSI-X中断PCI设备，通过irqfd机制直接将中断通过KVM注入给虚拟机的vcpu。
 
 ```c
 virtio_pci_set_guest_notifiers
