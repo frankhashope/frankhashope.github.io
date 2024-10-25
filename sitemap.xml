@@ -23,22 +23,22 @@
   <priority>0.80</priority>
 </url>
 <url>
-  <loc>https://frankhashope.github.io/virtualization/vm_reboot_shutdown_reset/</loc>
+  <loc>https://frankhashope.github.io/vmm/vm_reboot_shutdown_reset/</loc>
   <lastmod>2021-08-18T06:52:48+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
-  <loc>https://frankhashope.github.io/virtualization/virtio_vga_and_virtio_gpu/</loc>
+  <loc>https://frankhashope.github.io/vmm/virtio_vga_and_virtio_gpu/</loc>
   <lastmod>2021-08-18T06:52:48+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
-  <loc>https://frankhashope.github.io/virtualization/INTx_in_qemu_virt/</loc>
+  <loc>https://frankhashope.github.io/vmm/INTx_in_qemu_virt/</loc>
   <lastmod>2021-08-18T06:52:48+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
-  <loc>https://frankhashope.github.io/virtualization/virtio_blk_qemu_threads/</loc>
+  <loc>https://frankhashope.github.io/vmm/virtio_blk_qemu_threads/</loc>
   <lastmod>2021-08-18T06:52:48+00:00</lastmod>
   <priority>0.80</priority>
 </url>

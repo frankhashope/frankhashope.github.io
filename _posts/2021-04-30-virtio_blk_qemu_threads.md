@@ -5,7 +5,7 @@ header:
   overlay_color: "#48C9B0"
 classes: wide
 categories:
-  - Virtualization
+  - Virtual Machine Manager
 ---
 
 最近在测试openEuler发布的用rust写的虚拟化平台StratoVirt，当使用virtio-blk-device设备并且配置1个iothread时，I/O性能竟然比qemu在镜像介质为SSD或者内存盘的情况下性能还要好10%左右，这多少有点让人感到惊讶。
