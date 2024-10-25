@@ -3,9 +3,12 @@ title: "虚拟机的重启、关机以及重置"
 tagline: ""
 header:
   overlay_color: "#48C9B0"
-classes: wide
 categories:
   - Virtual Machine Manager
+toc: true
+toc_label: "虚拟机的重启、关机以及重置"
+toc_icon: "navicon"
+toc_sticky: true
 ---
 
 目前物理计算机的电源管理大部分均采用ACPI技术，它是英特尔等公司提出的操作系统应用程序管理所有电源管理接口的规范，包括了软件和硬件方面的规范，操作系统的电源管理功能通过调用 ACPI 接口，实现对符合 ACPI 规范的硬件设备的电源管理。和物理计算机一样，虚拟机同样需要类似重启、关机、重置等的生命周期操作，本文基于qemu/KVM分析上述生命周期在系统虚拟化的实现。

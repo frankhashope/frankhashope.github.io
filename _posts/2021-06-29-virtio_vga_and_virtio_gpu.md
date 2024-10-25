@@ -3,9 +3,12 @@ title: "virtio显卡实现分析"
 tagline: ""
 header:
   overlay_color: "#48C9B0"
-classes: wide
 categories:
   - Virtual Machine Manager
+toc: true
+toc_label: "virtio显卡实现分析"
+toc_icon: "navicon"
+toc_sticky: true
 ---
 
 virtio-vga与virtio-gpu是qemu模拟的较新的显卡设备，它们都是由Dave Airlie等人[引入](https://virgil3d.github.io/)，避免通过直通GPU来加速虚拟机内部的3D渲染。x86下使用virtio-vga，arm下使用virtio-gpu，guest里使用virtio-gpu作为前端驱动。x86下如果Guest OS中没有virtio-gpu驱动，则使用兼容的标准vga模式。此外为了提供高性能，virtio-vga与virtio-gpu都有对应的vhost-user用户态实现，即在另一个单独的用户态进程中模拟virtio-gpu。

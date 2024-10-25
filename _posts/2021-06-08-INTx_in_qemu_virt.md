@@ -3,9 +3,12 @@ title: "qemu如何模拟INTx"
 tagline: ""
 header:
   overlay_color: "#48C9B0"
-classes: wide
 categories:
   - Virtual Machine Manager
+toc: true
+toc_label: "qemu如何模拟INTx"
+toc_icon: "navicon"
+toc_sticky: true
 ---
 
 本文主要以针对arm架构实现的virt机型为例，分析qemu是如何实现INTx中断的模拟和虚拟化的。qemu在x86架构下的实现可参考这篇[文章](https://www.binss.me/blog/qemu-note-of-interrupt/)。PCI/PCIe设备支持INTx中断或者MSI/MSI-X中断，传统的一些老旧设备仍旧在使用通过中断引脚传递中断请求的INTx中断机制。此外，在arm平台下由于linux内核中GIC驱动的实现，如果有PCI桥且PCI桥下还有多个设备，也必须支持INTx中断。
