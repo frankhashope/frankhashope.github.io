@@ -1,5 +1,6 @@
 ---
 title: "virtio显卡实现分析"
+classes: "wide"
 tagline: ""
 header:
   overlay_color: "#48C9B0"

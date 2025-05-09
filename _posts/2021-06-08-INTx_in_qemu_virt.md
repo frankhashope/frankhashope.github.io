@@ -1,5 +1,6 @@
 ---
 title: "qemu如何模拟INTx"
+classes: "wide"
 tagline: ""
 header:
   overlay_color: "#48C9B0"

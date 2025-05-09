@@ -1,5 +1,6 @@
 ---
 title: "虚拟机的重启、关机以及重置"
+classes: "wide"
 tagline: ""
 header:
   overlay_color: "#48C9B0"

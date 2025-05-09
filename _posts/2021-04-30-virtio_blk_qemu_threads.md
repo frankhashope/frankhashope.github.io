@@ -1,5 +1,6 @@
 ---
 title: "从virtio-blk的I/O下发看qemu的线程模型"
+classes: "wide"
 tagline: ""
 header:
   overlay_color: "#48C9B0"
