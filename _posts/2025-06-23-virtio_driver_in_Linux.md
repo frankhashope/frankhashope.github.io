@@ -13,7 +13,7 @@ toc_sticky: true
 ---
 
 众所周知，virtio协议是虚拟化场景下诞生的一种前后端设备通信协议，极大提升了虚拟化场景下的I/O性能。该协议需要前后端共同配合实现，Guest OS内部需要安装virtio设备的前端驱动，后端VMM则负责模拟对应的virtio设备后端，两者基于virtio规范进行通信。
-本文主要基于Linux Kernel 6.6分析virtio设备的前端驱动实现，深入全面地理解virtio协议实现。
+本文主要基于Linux Kernel 6.6分析virtio设备的前端驱动实现，以求深入全面地理解virtio协议。
 
 # virtio总线
 
