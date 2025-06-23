@@ -180,3 +180,5 @@ virtnet_send_command()
 [1]<a name="ref1"> [Virtual I/O Device (VIRTIO) Version 1.3](https://docs.oasis-open.org/virtio/virtio/v1.3/virtio-v1.3.html)
 
 [2] [virtio前端驱动通知机制分析](https://blog.csdn.net/qq_41596356/article/details/128441953)
+
+[3] [virtio前端驱动详解](https://www.cnblogs.com/ck1020/p/6044134.html "发布于 2016-11-15 15:48")
