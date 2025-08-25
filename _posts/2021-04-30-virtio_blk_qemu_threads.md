@@ -32,19 +32,21 @@ static bool virtio_queue_notify_aio_vq(VirtQueue *vq)
 
     if (vq->vring.desc && vq->handle_aio_output) {
         VirtIODevice *vdev = vq->vdev;
-    
+
         trace_virtio_queue_notify(vdev, vq - vdev->vq, vq);
         ret = vq->handle_aio_output(vdev, vq);
-    
+
         if (unlikely(vdev->start_on_kick)) {
             virtio_set_started(vdev, true);
         }
     }
-    
+
     return ret;
 }
 ```
+
 其中的核心函数就是handle_aio_output回调，实际调用的是virtio_blk_data_plane_handle_output。其实际上是virtio_blk_handle_vq函数的简单封装。
+
 ```c
 bool virtio_blk_handle_vq(VirtIOBlock *s, VirtQueue *vq)
 {
@@ -55,12 +57,12 @@ bool virtio_blk_handle_vq(VirtIOBlock *s, VirtQueue *vq)
 
     aio_context_acquire(blk_get_aio_context(s->blk));
     blk_io_plug(s->blk);
-    
+
     do {
         if (suppress_notifications) {
             virtio_queue_set_notification(vq, 0);
         }
-    
+
         while ((req = virtio_blk_get_request(s, vq))) {
             progress = true;
             if (virtio_blk_handle_request(req, &mrb)) {
@@ -69,22 +71,24 @@ bool virtio_blk_handle_vq(VirtIOBlock *s, VirtQueue *vq)
                 break;
             }
         }
-    
+
         if (suppress_notifications) {
             virtio_queue_set_notification(vq, 1);
         }
     } while (!virtio_queue_empty(vq));
-    
+
     if (mrb.num_reqs) {
         virtio_blk_submit_multireq(s->blk, &mrb);
     }
-    
+
     blk_io_unplug(s->blk);
     aio_context_release(blk_get_aio_context(s->blk));
     return progress;
 }
 ```
+
 virtio_blk_get_request从available ring中取出IO请求封装成VirtIOBlockReq，然后调用virtio_blk_handle_request函数将多个请求填充到mrb中。
+
 ```c
 static int virtio_blk_handle_request(VirtIOBlockReq *req, MultiReqBuffer *mrb)
 {
@@ -97,7 +101,7 @@ static int virtio_blk_handle_request(VirtIOBlockReq *req, MultiReqBuffer *mrb)
     VirtIODevice *vdev = VIRTIO_DEVICE(s);
 
     ......
-    
+
     /* We always touch the last byte, so just see how big in_iov is.  */
     req->in_len = iov_size(in_iov, in_num);
     req->in = (void *)in_iov[in_num - 1].iov_base
@@ -105,9 +109,9 @@ static int virtio_blk_handle_request(VirtIOBlockReq *req, MultiReqBuffer *mrb)
               - sizeof(struct virtio_blk_inhdr);
     iov_discard_back_undoable(in_iov, &in_num, sizeof(struct virtio_blk_inhdr),
                               &req->inhdr_undo);
-    
+
     type = virtio_ldl_p(vdev, &req->out.type);
-    
+
     /* VIRTIO_BLK_T_OUT defines the command direction. VIRTIO_BLK_T_BARRIER
      * is an optional flag. Although a guest should not send this flag if
      * not negotiated we ignored it in the past. So keep ignoring it. */
@@ -116,7 +120,7 @@ static int virtio_blk_handle_request(VirtIOBlockReq *req, MultiReqBuffer *mrb)
     {
         bool is_write = type & VIRTIO_BLK_T_OUT;
         req->sector_num = virtio_ldq_p(vdev, &req->out.sector);
-    
+
         if (is_write) {
             qemu_iovec_init_external(&req->qiov, out_iov, out_num);
             trace_virtio_blk_handle_write(vdev, req, req->sector_num,
@@ -126,9 +130,9 @@ static int virtio_blk_handle_request(VirtIOBlockReq *req, MultiReqBuffer *mrb)
             trace_virtio_blk_handle_read(vdev, req, req->sector_num,
                                          req->qiov.size / BDRV_SECTOR_SIZE);
         }
-    
+
         ......
-    
+
         /* merge would exceed maximum number of requests or IO direction
          * changes */
         if (mrb->num_reqs > 0 && (mrb->num_reqs == VIRTIO_BLK_MAX_MERGE_REQS ||
@@ -136,7 +140,7 @@ static int virtio_blk_handle_request(VirtIOBlockReq *req, MultiReqBuffer *mrb)
                                   !s->conf.request_merging)) {
             virtio_blk_submit_multireq(s->blk, mrb);
         }
-    
+
         assert(mrb->num_reqs < VIRTIO_BLK_MAX_MERGE_REQS);
         mrb->reqs[mrb->num_reqs++] = req;
         mrb->is_write = is_write;
@@ -149,7 +153,7 @@ static int virtio_blk_handle_request(VirtIOBlockReq *req, MultiReqBuffer *mrb)
         virtio_blk_handle_scsi(req);
         break;
     case VIRTIO_BLK_T_GET_ID:
-    	......
+        ......
     /*
      * VIRTIO_BLK_T_DISCARD and VIRTIO_BLK_T_WRITE_ZEROES are defined with
      * VIRTIO_BLK_T_OUT flag set. We masked this flag in the switch statement,
@@ -157,7 +161,7 @@ static int virtio_blk_handle_request(VirtIOBlockReq *req, MultiReqBuffer *mrb)
      */
     case VIRTIO_BLK_T_DISCARD & ~VIRTIO_BLK_T_OUT:
     case VIRTIO_BLK_T_WRITE_ZEROES & ~VIRTIO_BLK_T_OUT:
-    	......
+        ......
     default:
         virtio_blk_req_complete(req, VIRTIO_BLK_S_UNSUPP);
         virtio_blk_free_request(req);
@@ -165,7 +169,9 @@ static int virtio_blk_handle_request(VirtIOBlockReq *req, MultiReqBuffer *mrb)
     return 0;
 }
 ```
+
 当mbr满或者队列遍历完之后调用virtio_blk_submit_multireq函数将IO请求提交给后端驱动。virtio_blk_submit_multireq实际最终调用了blk_aio_prwv函数。
+
 ```c
 BlockAIOCB *blk_aio_pwritev(BlockBackend *blk, int64_t offset,
                             QEMUIOVector *qiov, BdrvRequestFlags flags,
@@ -194,20 +200,22 @@ static BlockAIOCB *blk_aio_prwv(BlockBackend *blk, int64_t offset, int bytes,
     };
     acb->bytes = bytes;
     acb->has_returned = false;
-    
+
     co = qemu_coroutine_create(co_entry, acb);
     bdrv_coroutine_enter(blk_bs(blk), co);
-    
+
     acb->has_returned = true;
     if (acb->rwco.ret != NOT_DONE) {
         replay_bh_schedule_oneshot_event(blk_get_aio_context(blk),
                                          blk_aio_complete_bh, acb);
     }
-    
+
     return &acb->common;
 }
 ```
+
 blk_aio_prwv创建了一个协程调用blk_aio_write_entry函数。
+
 ```c
 static void blk_aio_write_entry(void *opaque)
 {
@@ -221,7 +229,9 @@ static void blk_aio_write_entry(void *opaque)
     blk_aio_complete(acb);
 }
 ```
+
 blk_aio_write_entry在后端block设备是文件时，最终调用的函数是raw_co_pwritev。当命令行参数指定aio=threads时，raw_co_prw函数会调用raw_thread_pool_submit函数提交下半部任务通知指定事件源所在的线程去创建AIO线程（如果没有空闲线程且AIO线程池线程数没有超过最大限制）。
+
 ```c
 static void spawn_thread(ThreadPool *pool)
 {
@@ -239,7 +249,9 @@ static void spawn_thread(ThreadPool *pool)
     }
 }
 ```
+
 qemu_bh_schedule调用aio_bh_enqueue接口将下半部任务添加到指定的AioContext的下半部任务列表里，然后调用aio_notify接口通知指定事件源所在的线程。
+
 ```c
 void aio_notify(AioContext *ctx)
 {
@@ -260,15 +272,17 @@ void aio_notify(AioContext *ctx)
     }
 }
 ```
+
 qemu用AioContext结构体来定义事件源，该结构体里存放了所有加入到这个事件源的fd的事件处理函数、下半部任务列表、事件通知对象notifier等。qemu的事件源分两类，一类是处理各种各样事件的iohandler_ctx，另一类是处理块设备的异步IO请求，可以是主线程的qemu_aio_context，或者是模块自己创建的AioContext。如果配置了iothread，iothread也会创建对应的事件源。block设备通过bdrv_attach_aio_context函数注册指定的事件源。对应线程poll fd收到事件后，会调用aio_dispatch_handler函数来调用处理事件的回调。
 
 当后端驱动完成IO的下发后需要填充virtio的used ring，向guest OS注入中断通知前端驱动。
+
 ```c
 blk_aio_complete
     --> virtio_blk_rw_complete
-    	--> virtio_blk_req_complete
-    		--> virtio_blk_data_plane_notify
-    			--> virtio_notify_irqfd
+        --> virtio_blk_req_complete
+            --> virtio_blk_data_plane_notify
+                --> virtio_notify_irqfd
 
 void virtio_notify_irqfd(VirtIODevice *vdev, VirtQueue *vq)
 {
@@ -279,7 +293,7 @@ void virtio_notify_irqfd(VirtIODevice *vdev, VirtQueue *vq)
     }
 
     trace_virtio_notify_irqfd(vdev, vq);
-    
+
     /*
      * virtio spec 1.0 says ISR bit 0 should be ignored with MSI, but
      * windows drivers included in virtio-win 1.8.0 (circa 2015) are
@@ -299,7 +313,9 @@ void virtio_notify_irqfd(VirtIODevice *vdev, VirtQueue *vq)
     event_notifier_set(&vq->guest_notifier);
 }
 ```
+
 在设备不使用MSI/MSI-X或者KVM不支持KVM_CAP_IRQ时，向guest注入中断的回调为virtio_queue_guest_notifier_read函数，其通过ioctl系统调用借助KVM模块实现中断注入的目的。virtio_queue_guest_notifier_read由event_notifier_set_handler函数注册，注入中断的事件被加到了main loop的iohandler_ctx这个事件源里，也就是说IO完成后会通过写eventfd通知主线程，再由主线程来注入中断。
+
 ```c
 void event_notifier_set_handler(EventNotifier *e,
                                 EventNotifierHandler *handler)
@@ -309,14 +325,15 @@ void event_notifier_set_handler(EventNotifier *e,
                            handler, NULL);
 }
 ```
+
 如果是支持MSI/MSI-X中断PCI设备，通过irqfd机制直接将中断通过KVM注入给虚拟机的vcpu。
 
 ```c
 virtio_pci_set_guest_notifiers
     --> kvm_virtio_pci_vector_use
-    	-- > kvm_virtio_pci_irqfd_use
-    		-- > kvm_irqchip_add_irqfd_notifier_gsi
-    			-- > kvm_irqchip_assign_irqfd
+        -- > kvm_virtio_pci_irqfd_use
+            -- > kvm_irqchip_add_irqfd_notifier_gsi
+                -- > kvm_irqchip_assign_irqfd
 ```
 
 ### 总结
@@ -333,4 +350,3 @@ qemu默认有一个主线程，借助glib的事件循环机制实现事件的监
 
 [3] [Virtio-blk Multi-queue Conversion 
 and QEMU Optimization](https://www.linux-kvm.org/images/6/63/02x06a-VirtioBlk.pdf)
-

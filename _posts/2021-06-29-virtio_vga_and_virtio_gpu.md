@@ -95,7 +95,7 @@ static void virtio_vga_inst_initfn(Object *obj)
       -> virtio_vga_base_realize
         -> device_set_realized
           -> virtio_device_realize
-    	    -> virtio_gpu_device_realize
+            -> virtio_gpu_device_realize
 ```
 
 可以看到由于virtio-vga本身是一个virtio-pci设备，因此首先调用了virtio pci的realize接口，然后调用了virtio-vga注册的realize回调。

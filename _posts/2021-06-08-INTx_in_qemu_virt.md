@@ -117,7 +117,7 @@ virt主板的PCIe主桥称为GPEX，在create_pcie函数中将创建和初始化
 
 ```c
 for (i = 0; i < GPEX_NUM_IRQS; i++) {
-	sysbus_connect_irq(SYS_BUS_DEVICE(dev), i,
+    sysbus_connect_irq(SYS_BUS_DEVICE(dev), i,
                        qdev_get_gpio_in(vms->gic, irq + i));
     gpex_set_irq_num(GPEX_HOST(dev), i, irq + i);
 }
@@ -249,8 +249,3 @@ static void pci_change_irq_level(PCIDevice *pci_dev, int irq_num, int change)
 [1] [PCI Express体系结构导读](https://github.com/vvvlan/misc/blob/master/PCI+Express%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E5%AF%BC%E8%AF%BB.pdf)
 
 [2] [Advanced Configuration and Power Interface (ACPI) Specification](https://uefi.org/specs/ACPI/6.4/index.html)
-
-
-
-
-
